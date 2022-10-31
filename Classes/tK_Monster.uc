@@ -1,5 +1,5 @@
 class tK_Monster extends Monster
-    config(tK_BaseM);
+    config(tK_Monsters);
 
 #EXEC OBJ LOAD FILE="Resources\satoreMonstersMesh.u" PACKAGE="tK_BaseM"
 
