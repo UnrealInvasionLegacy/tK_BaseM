@@ -25,7 +25,6 @@ event EncroachedBy( actor Other )
     {
         Speed = VSize(Vehicle(Other).Velocity);
         Dir = Normal(Vehicle(Other).Velocity);
-        log("dot=" $ Dir dot Normal(Location - Other.Location));
 
         if (Dir dot Normal(Location - Other.Location) > 0)
         {
