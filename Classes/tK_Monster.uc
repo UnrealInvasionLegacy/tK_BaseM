@@ -13,6 +13,9 @@ var() bool bReduceDamPlayerNum;
 var() bool bNoTelefrag;
 var() bool bNoCrushVehicle;
 
+delegate OnDestroyed();
+delegate OnDied(Controller Killer, class<DamageType> DamageType, vector HitLocation);
+
 event EncroachedBy( actor Other )
 {
     local float Speed;
@@ -111,6 +114,18 @@ simulated function SpawnGiblet(class<Gib> GibClass, Vector Location, Rotator Rot
     GetAxes(Rotation, Dummy, Dummy, Direction);
 
     Giblet.Velocity = Velocity + Normal(Direction) * 512.0;
+}
+
+simulated function Destroyed()
+{
+    OnDestroyed();
+    Super.Destroyed();
+}
+
+function Died(Controller Killer, class<DamageType> DamageType, vector HitLocation)
+{
+    OnDied(Killer, DamageType, HitLocation);
+    Super.Died(Killer, DamageType, HitLocation);
 }
 
 defaultproperties
