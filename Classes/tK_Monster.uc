@@ -12,6 +12,7 @@ var() string MonsterName;
 var() bool bReduceDamPlayerNum;
 var() bool bNoTelefrag;
 var() bool bNoCrushVehicle;
+var config int HP;
 
 delegate OnDestroyed();
 delegate OnDied(Controller Killer, class<DamageType> DamageType, vector HitLocation);
