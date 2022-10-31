@@ -1,4 +1,4 @@
-class tK_Skaarj extends SMPMonster;
+class tK_Skaarj extends tK_Monster;
 
 var sound FootStep[2];
 var name DeathAnim[4];

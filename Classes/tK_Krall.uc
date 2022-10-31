@@ -1,7 +1,7 @@
 //=============================================================================
 // Krall.
 //=============================================================================
-class tK_Krall extends SMPMonster;
+class tK_Krall extends tK_Monster;
 
 var bool bAttackSuccess;
 var bool bLegless;

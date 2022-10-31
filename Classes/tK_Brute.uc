@@ -1,7 +1,7 @@
 //=============================================================================
 // Brute.
 //=============================================================================
-class tK_Brute extends SMPMonster;
+class tK_Brute extends tK_Monster;
 
 #EXEC OBJ LOAD FILE=SkaarjPackSkins.utx
 

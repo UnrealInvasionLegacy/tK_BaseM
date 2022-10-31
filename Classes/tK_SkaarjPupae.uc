@@ -1,4 +1,4 @@
-class tK_SkaarjPupae extends SMPMonster;
+class tK_SkaarjPupae extends tK_Monster;
 
 var name DeathAnims[3];
 var bool bLunging;

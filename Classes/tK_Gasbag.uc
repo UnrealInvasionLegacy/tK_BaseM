@@ -1,4 +1,4 @@
-class tK_Gasbag extends SMPMonster;
+class tK_Gasbag extends tK_Monster;
 
 function RangedAttack(Actor A)
 {

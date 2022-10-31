@@ -1,10 +1,10 @@
-class tK_WarLord extends SMPMonster;
+class tK_WarLord extends tK_Monster;
 
 var bool bRocketDir;
 
 function bool SameSpeciesAs(Pawn P)
 {
-    return (tK_Skaarj(P) != None || tK_WarLord(P) != None)
+    return (tK_Skaarj(P) != None || tK_WarLord(P) != None);
 }
 
 function PostBeginPlay()

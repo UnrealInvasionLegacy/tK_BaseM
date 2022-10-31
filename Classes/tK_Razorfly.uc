@@ -1,4 +1,4 @@
-class tK_Razorfly extends SMPMonster;
+class tK_Razorfly extends tK_Monster;
 
 simulated function PostBeginPlay()
 {
