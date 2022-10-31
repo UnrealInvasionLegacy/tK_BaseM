@@ -1,5 +1,5 @@
 class SMPDamTypeSlith extends WeaponDamageType
-	abstract;
+    abstract;
 
 defaultproperties
 {

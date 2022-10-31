@@ -1,5 +1,5 @@
 class SMPDevilFish extends SMPMonster
-	config(tK_BaseM);
+    config(tK_BaseM);
 
 var float AirTime;
 var() byte BiteDamage, RipDamage;
@@ -9,96 +9,96 @@ var bool bFlopping;
 
 replication
 {
-	unreliable if (Role == ROLE_Authority)
-		bFlopping;
+    unreliable if (Role == ROLE_Authority)
+        bFlopping;
 }
 
 event PostBeginPlay()
 {
-	Super.PostBeginPlay();
-	if (!CheckWater())
-		Destroy();
+    Super.PostBeginPlay();
+    if (!CheckWater())
+        Destroy();
 }
 
 function bool CheckWater()
 {
-	local PhysicsVolume PV;
-	local vector HitLoc,HitNorm;
+    local PhysicsVolume PV;
+    local vector HitLoc,HitNorm;
 
-	if (!bCheckWater || PhysicsVolume.bWaterVolume)
-		return true;
+    if (!bCheckWater || PhysicsVolume.bWaterVolume)
+        return true;
 
-	foreach TraceActors(class'PhysicsVolume', PV, HitLoc, HitNorm, Location + vect(0,0,-1)*700, Location + vect(0,0,-1)*CollisionHeight/2)
-	{
-		if (PV != None && PV.bWaterVolume)
-		{
-			if (FastTrace(Location, HitLoc))
-			{
-				if (SetLocation(HitLoc));
-					return true;
-			}
-		}
-	}
+    foreach TraceActors(class'PhysicsVolume', PV, HitLoc, HitNorm, Location + vect(0,0,-1)*700, Location + vect(0,0,-1)*CollisionHeight/2)
+    {
+        if (PV != None && PV.bWaterVolume)
+        {
+            if (FastTrace(Location, HitLoc))
+            {
+                if (SetLocation(HitLoc));
+                    return true;
+            }
+        }
+    }
 
-	return false;
+    return false;
 }
 
 function RangedAttack(Actor A)
 {
-	local float Dist, decision;
+    local float Dist, decision;
 
-	if (bShotAnim)
-		return;
+    if (bShotAnim)
+        return;
 
-	Dist = VSize(Location - A.Location);
-	if (Dist > MeleeRange + CollisionRadius + A.CollisionRadius)
-		return;
+    Dist = VSize(Location - A.Location);
+    if (Dist > MeleeRange + CollisionRadius + A.CollisionRadius)
+        return;
 
-	bShotAnim = true;
-	if (GetAnimSequence() == 'Grab1')
-	{
-		PlayAnim('ripper', 0.5 + 0.5 * FRand());
-		PlaySound(sound'tear1fs',SLOT_Interact,,,500);
-		MeleeDamageTarget(RipDamage, vect(0,0,0));
-		Disable('Bump');
-		return;
-	}
+    bShotAnim = true;
+    if (GetAnimSequence() == 'Grab1')
+    {
+        PlayAnim('ripper', 0.5 + 0.5 * FRand());
+        PlaySound(sound'tear1fs',SLOT_Interact,,,500);
+        MeleeDamageTarget(RipDamage, vect(0,0,0));
+        Disable('Bump');
+        return;
+    }
 
-	decision = FRand();
-	if (decision < 0.3)
-	{
-		Disable('Bump');
-		SetAnimAction('Grab1');
-		return;
-	}
+    decision = FRand();
+    if (decision < 0.3)
+    {
+        Disable('Bump');
+        SetAnimAction('Grab1');
+        return;
+    }
 
-	Enable('Bump');
-	if (decision < 0.55)
-	{
-		SetAnimAction('Bite1');
-	}
-	else if (decision < 0.8)
-	{
- 		SetAnimAction('Bite2');
- 	}
- 	else
- 	{
- 		SetAnimAction('Bite3');
- 	}
- 	MeleeDamageTarget(BiteDamage, (BiteDamage * 1000.0 * Normal(Controller.Target.Location - Location)));
+    Enable('Bump');
+    if (decision < 0.55)
+    {
+        SetAnimAction('Bite1');
+    }
+    else if (decision < 0.8)
+    {
+        SetAnimAction('Bite2');
+    }
+    else
+    {
+        SetAnimAction('Bite3');
+    }
+    MeleeDamageTarget(BiteDamage, (BiteDamage * 1000.0 * Normal(Controller.Target.Location - Location)));
 }
 
 simulated event SetAnimAction(name NewAction)
 {
-	if ( !bWaitForAnim || (Level.NetMode == NM_Client) )
-	{
-		AnimAction = NewAction;
-		if (PlayAnim(AnimAction,,0.3))
-		{
-			if (Physics != PHYS_None)
-				bWaitForAnim = true;
-		}
-	}
+    if ( !bWaitForAnim || (Level.NetMode == NM_Client) )
+    {
+        AnimAction = NewAction;
+        if (PlayAnim(AnimAction,,0.3))
+        {
+            if (Physics != PHYS_None)
+                bWaitForAnim = true;
+        }
+    }
 }
 
 singular function Bump(actor Other)
@@ -107,156 +107,156 @@ singular function Bump(actor Other)
 
 simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 {
-	AmbientSound = None;
-	bCanTeleport = false;
-	bReplicateMovement = false;
-	bTearOff = true;
-	bPlayedDeath = true;
+    AmbientSound = None;
+    bCanTeleport = false;
+    bReplicateMovement = false;
+    bTearOff = true;
+    bPlayedDeath = true;
 
-	HitDamageType = DamageType;
-	TakeHitLocation = HitLoc;
-	LifeSpan = RagdollLifeSpan;
+    HitDamageType = DamageType;
+    TakeHitLocation = HitLoc;
+    LifeSpan = RagdollLifeSpan;
 
-	GotoState('Dying');
+    GotoState('Dying');
 
-	Velocity += TearOffMomentum;
-	BaseEyeHeight = Default.BaseEyeHeight;
-	SetPhysics(PHYS_Falling);
+    Velocity += TearOffMomentum;
+    BaseEyeHeight = Default.BaseEyeHeight;
+    SetPhysics(PHYS_Falling);
 
-	if (PhysicsVolume.bWaterVolume)
-	{
-		PlaySound(sound'death1fs', SLOT_Talk, 4 * TransientSoundVolume);
-		PlayAnim('Dead1', 0.7, 0.1);
-	}
-	else
-		TweenAnim('Breathing', 0.35);
+    if (PhysicsVolume.bWaterVolume)
+    {
+        PlaySound(sound'death1fs', SLOT_Talk, 4 * TransientSoundVolume);
+        PlayAnim('Dead1', 0.7, 0.1);
+    }
+    else
+        TweenAnim('Breathing', 0.35);
 }
 
 simulated function PlayDirectionalHit(Vector HitLoc)
 {
-	TweenAnim('TakeHit', 0.05);
+    TweenAnim('TakeHit', 0.05);
 }
 
 function Landed(vector HitNormal)
 {
-	if (PhysicsVolume.bWaterVolume)
-		return;
-	GotoState('Flopping');
-	Landed(HitNormal);
+    if (PhysicsVolume.bWaterVolume)
+        return;
+    GotoState('Flopping');
+    Landed(HitNormal);
 }
 
 function PlayVictory()
 {
-	Controller.bPreparingMove = true;
-	Acceleration = vect(0,0,0);
-	bShotAnim = true;
-	PlayAnim('ripper', 0.6, 0.1);
-	Controller.Destination = Location;
-	Controller.GotoState('TacticalMove','WaitForAnim');
+    Controller.bPreparingMove = true;
+    Acceleration = vect(0,0,0);
+    bShotAnim = true;
+    PlayAnim('ripper', 0.6, 0.1);
+    Controller.Destination = Location;
+    Controller.GotoState('TacticalMove','WaitForAnim');
 }
 
 function SetMovementPhysics()
 {
-	SetPhysics(PHYS_Swimming);
+    SetPhysics(PHYS_Swimming);
 }
 
 simulated function AnimEnd(int Channel)
 {
-	if (bFlopping)
-	{
-		if (Physics == PHYS_None)
-		{
-			if (GetAnimSequence() == 'Breathing')
-			{
-				PlaySound(sound'breath1fs',SLOT_Interact,,,300);
-				PlayAnim('Breathing');
-			}
-			else
-				TweenAnim('Breathing', 0.2);
-		}
-		else
-			PlayAnim('Flopping', 0.7);
-	}
-	super.AnimEnd(Channel);
+    if (bFlopping)
+    {
+        if (Physics == PHYS_None)
+        {
+            if (GetAnimSequence() == 'Breathing')
+            {
+                PlaySound(sound'breath1fs',SLOT_Interact,,,300);
+                PlayAnim('Breathing');
+            }
+            else
+                TweenAnim('Breathing', 0.2);
+        }
+        else
+            PlayAnim('Flopping', 0.7);
+    }
+    super.AnimEnd(Channel);
 }
 
 state Flopping
 {
 ignores seeplayer, hearnoise, enemynotvisible, hitwall;
 
-	function Timer()
-	{
-		AirTime += 1;
-		if (AirTime > 25 + 15 * FRand())
-		{
-			Health = -1;
-			Died(None, class'Drowned', Location);
-			return;
-		}
-		SetPhysics(PHYS_Falling);
-		Velocity = 200 * VRand();
-		Velocity.Z = 200 + 200 * FRand();
-		DesiredRotation.Pitch = Rand(8192) - 4096;
-		DesiredRotation.Yaw = Rand(65535);
-		SetAnimAction('Flopping');
-	}
+    function Timer()
+    {
+        AirTime += 1;
+        if (AirTime > 25 + 15 * FRand())
+        {
+            Health = -1;
+            Died(None, class'Drowned', Location);
+            return;
+        }
+        SetPhysics(PHYS_Falling);
+        Velocity = 200 * VRand();
+        Velocity.Z = 200 + 200 * FRand();
+        DesiredRotation.Pitch = Rand(8192) - 4096;
+        DesiredRotation.Yaw = Rand(65535);
+        SetAnimAction('Flopping');
+    }
 
-	function RangedAttack(Actor A)
-	{}
+    function RangedAttack(Actor A)
+    {}
 
-	event PhysicsVolumeChange(PhysicsVolume NewVolume)
-	{
-		local rotator newRotation;
+    event PhysicsVolumeChange(PhysicsVolume NewVolume)
+    {
+        local rotator newRotation;
 
-		if (NewVolume.bWaterVolume)
-		{
-			newRotation = Rotation;
-			newRotation.Roll = 0;
-			SetRotation(newRotation);
-			SetPhysics(PHYS_Swimming);
-			AirTime = 0;
-			GotoState(initialstate);
-		}
-		else
-			SetPhysics(PHYS_Falling);
-	}
+        if (NewVolume.bWaterVolume)
+        {
+            newRotation = Rotation;
+            newRotation.Roll = 0;
+            SetRotation(newRotation);
+            SetPhysics(PHYS_Swimming);
+            AirTime = 0;
+            GotoState(initialstate);
+        }
+        else
+            SetPhysics(PHYS_Falling);
+    }
 
-	function Landed(vector HitNormal)
-	{
-		local rotator newRotation;
-		SetPhysics(PHYS_none);
-		SetTimer(0.3 + 0.3 * AirTime * FRand(), false);
-		newRotation = Rotation;
-		newRotation.Pitch = 0;
-		newRotation.Roll = Rand(16384) - 8192;
-		DesiredRotation.Pitch = 0;
-		SetRotation(newRotation);
-		PlaySound(sound'flop1fs',SLOT_Interact,,,400);
-		TweenAnim('Breathing', 0.3);
-	}
+    function Landed(vector HitNormal)
+    {
+        local rotator newRotation;
+        SetPhysics(PHYS_none);
+        SetTimer(0.3 + 0.3 * AirTime * FRand(), false);
+        newRotation = Rotation;
+        newRotation.Pitch = 0;
+        newRotation.Roll = Rand(16384) - 8192;
+        DesiredRotation.Pitch = 0;
+        SetRotation(newRotation);
+        PlaySound(sound'flop1fs',SLOT_Interact,,,400);
+        TweenAnim('Breathing', 0.3);
+    }
 
-	simulated event SetAnimAction(name NewAction)
-	{
-		if ( !bWaitForAnim || (Level.NetMode == NM_Client) )
-		{
-			AnimAction = NewAction;
-			if (PlayAnim(AnimAction,,0.1))
-			{
-				if (Physics != PHYS_None)
-					bWaitForAnim = true;
-			}
-		}
-	}
+    simulated event SetAnimAction(name NewAction)
+    {
+        if ( !bWaitForAnim || (Level.NetMode == NM_Client) )
+        {
+            AnimAction = NewAction;
+            if (PlayAnim(AnimAction,,0.1))
+            {
+                if (Physics != PHYS_None)
+                    bWaitForAnim = true;
+            }
+        }
+    }
 
-	simulated function BeginState()
-	{
-		bFlopping = true;
-	}
+    simulated function BeginState()
+    {
+        bFlopping = true;
+    }
 
-	simulated function EndState()
-	{
-		bFlopping = false;
-	}
+    simulated function EndState()
+    {
+        bFlopping = false;
+    }
 }
 
 defaultproperties

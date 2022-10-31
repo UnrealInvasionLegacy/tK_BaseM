@@ -2,61 +2,61 @@ class SMPNaliRabbit extends SMPNaliCow;
 
 simulated function Tick(float DeltaTime)
 {
-	local Monster Other;
+    local Monster Other;
 
-	Super.Tick(DeltaTime);
+    Super.Tick(DeltaTime);
 
-	if (Physics !=PHYS_Falling)
-		Velocity.Z = 0;
+    if (Physics !=PHYS_Falling)
+        Velocity.Z = 0;
 
-	if (VSize(Velocity) > 70  && Physics != PHYS_Falling)
-	{
-		DoJump(true);
-		foreach VisibleCollidingActors(class'Monster', Other, TargetRadius, Location)
-		{
-			if (!Other.bAmbientCreature && Other.Controller != None)
-				Other.Controller.Trigger(none,self);
-		}
-	}
+    if (VSize(Velocity) > 70  && Physics != PHYS_Falling)
+    {
+        DoJump(true);
+        foreach VisibleCollidingActors(class'Monster', Other, TargetRadius, Location)
+        {
+            if (!Other.bAmbientCreature && Other.Controller != None)
+                Other.Controller.Trigger(none,self);
+        }
+    }
 }
 
 simulated function AnimEnd(int Channel)
 {
-	local name Anim;
-	local float frame, rate;
+    local name Anim;
+    local float frame, rate;
 
-	if (Channel == 0)
-	{
-		GetAnimParams(0, Anim,frame,rate);
-		if (Anim == 'Call')
-			IdleWeaponAnim = 'Looking';
-		else if ((Anim == 'Looking') && (FRand() < 0.5))
-			IdleWeaponAnim = 'Eat';
-		else
-			IdleWeaponAnim = 'Call';
-	}
-	Super(SMPMonster).AnimEnd(Channel);
+    if (Channel == 0)
+    {
+        GetAnimParams(0, Anim,frame,rate);
+        if (Anim == 'Call')
+            IdleWeaponAnim = 'Looking';
+        else if ((Anim == 'Looking') && (FRand() < 0.5))
+            IdleWeaponAnim = 'Eat';
+        else
+            IdleWeaponAnim = 'Call';
+    }
+    Super(SMPMonster).AnimEnd(Channel);
 }
 
 simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 {
-	AmbientSound = None;
-	bCanTeleport = false;
-	bReplicateMovement = false;
-	bTearOff = true;
-	bPlayedDeath = true;
+    AmbientSound = None;
+    bCanTeleport = false;
+    bReplicateMovement = false;
+    bTearOff = true;
+    bPlayedDeath = true;
 
-	HitDamageType = DamageType;
-	TakeHitLocation = HitLoc;
-	LifeSpan = RagdollLifeSpan;
+    HitDamageType = DamageType;
+    TakeHitLocation = HitLoc;
+    LifeSpan = RagdollLifeSpan;
 
-	GotoState('Dying');
+    GotoState('Dying');
 
-	Velocity += TearOffMomentum;
-	BaseEyeHeight = Default.BaseEyeHeight;
-	SetPhysics(PHYS_Falling);
+    Velocity += TearOffMomentum;
+    BaseEyeHeight = Default.BaseEyeHeight;
+    SetPhysics(PHYS_Falling);
 
-	CreateGib('head',DamageType,Rotation);
+    CreateGib('head',DamageType,Rotation);
 }
 
 defaultproperties

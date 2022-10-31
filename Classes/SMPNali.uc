@@ -5,93 +5,93 @@ var bool bCringing;
 
 simulated function Timer()
 {
- 	local Monster other;
+    local Monster other;
 
-	foreach VisibleCollidingActors(class'Monster', Other, TargetRadius, Location)
-	{
-		if (!Other.bAmbientCreature && Other.Controller != None)
-			Other.Controller.Trigger(none, self);
-	}
+    foreach VisibleCollidingActors(class'Monster', Other, TargetRadius, Location)
+    {
+        if (!Other.bAmbientCreature && Other.Controller != None)
+            Other.Controller.Trigger(none, self);
+    }
 }
 
 function Step()
 {
-	PlaySound(sound'WalkC', SLOT_Interact);
+    PlaySound(sound'WalkC', SLOT_Interact);
 }
 
 function RangedAttack(Actor A)
 {
-	if (bShotAnim || !bCringing)
-		return;
+    if (bShotAnim || !bCringing)
+        return;
 
-	if (Controller.Enemy == None)
-	{
-		bCringing=false;
-		return;
-	}
+    if (Controller.Enemy == None)
+    {
+        bCringing=false;
+        return;
+    }
 
-	bShotAnim = true;
-	if (0.4 > FRand())
-	{
-		SetAnimAction('Cringe');
-		PlaySound(sound'cringe2n', SLOT_Pain,2*TransientSoundVolume,,400);
-		Controller.bPreparingMove = true;
-		Acceleration = vect(0,0,0);
-	}
-	else
-	{
-		SetAnimAction('Backup');
-		Acceleration = vector(Rotation)*-100;
-	}
+    bShotAnim = true;
+    if (0.4 > FRand())
+    {
+        SetAnimAction('Cringe');
+        PlaySound(sound'cringe2n', SLOT_Pain,2*TransientSoundVolume,,400);
+        Controller.bPreparingMove = true;
+        Acceleration = vect(0,0,0);
+    }
+    else
+    {
+        SetAnimAction('Backup');
+        Acceleration = vector(Rotation)*-100;
+    }
 }
 
 simulated function PlayDirectionalHit(Vector HitLoc)
 {
-	local Vector X,Y,Z, Dir;
+    local Vector X,Y,Z, Dir;
 
-	bCringing = true;
+    bCringing = true;
 
-	GetAxes(Rotation, X,Y,Z);
-	HitLoc.Z = Location.Z;
-	if (VSize(Location - HitLoc) < 1.0)
-		Dir = VRand();
-	else
-		Dir = -Normal(Location - HitLoc);
+    GetAxes(Rotation, X,Y,Z);
+    HitLoc.Z = Location.Z;
+    if (VSize(Location - HitLoc) < 1.0)
+        Dir = VRand();
+    else
+        Dir = -Normal(Location - HitLoc);
 
-	if (Dir Dot X > 0.7 || Dir == vect(0,0,0))
-		PlayAnim('HeadHit',, 0.1);
-	else if (Dir Dot X < -0.7)
-		PlayAnim('GutHit',, 0.1);
-	else if (Dir Dot Y > 0)
-		PlayAnim('RightHit',, 0.1);
-	else
-		PlayAnim('LeftHit',, 0.1);
+    if (Dir Dot X > 0.7 || Dir == vect(0,0,0))
+        PlayAnim('HeadHit',, 0.1);
+    else if (Dir Dot X < -0.7)
+        PlayAnim('GutHit',, 0.1);
+    else if (Dir Dot Y > 0)
+        PlayAnim('RightHit',, 0.1);
+    else
+        PlayAnim('LeftHit',, 0.1);
 }
 
 simulated function PlayDirectionalDeath(Vector HitLoc)
 {
-	local Vector X,Y,Z, Dir;
+    local Vector X,Y,Z, Dir;
 
-	GetAxes(Rotation, X,Y,Z);
-	HitLoc.Z = Location.Z;
+    GetAxes(Rotation, X,Y,Z);
+    HitLoc.Z = Location.Z;
 
-	if (VSize(Velocity) < 10.0 && VSize(Location - HitLoc) < 1.0)
-		Dir = VRand();
-	else if (VSize(Velocity) > 0.0)
-		Dir = Normal(Velocity*Vect(1,1,0));
-	else
-		Dir = -Normal(Location - HitLoc);
+    if (VSize(Velocity) < 10.0 && VSize(Location - HitLoc) < 1.0)
+        Dir = VRand();
+    else if (VSize(Velocity) > 0.0)
+        Dir = Normal(Velocity*Vect(1,1,0));
+    else
+        Dir = -Normal(Location - HitLoc);
 
-	if (Dir dot X > 0.7 || Dir == vect(0,0,0))
-		PlayAnim('Dead',, 0.2);
-	else if (Dir Dot X < -0.7)
-		PlayAnim('Dead',, 0.2);
-	else if (Dir dot Y > 0)
-		PlayAnim('Dead2',, 0.2);
-	else if (Dir dot Z > 0.8)
-		PlayAnim('Dead3',, 0.2);
-	else
-		PlayAnim('Dead4',, 0.2);
+    if (Dir dot X > 0.7 || Dir == vect(0,0,0))
+        PlayAnim('Dead',, 0.2);
+    else if (Dir Dot X < -0.7)
+        PlayAnim('Dead',, 0.2);
+    else if (Dir dot Y > 0)
+        PlayAnim('Dead2',, 0.2);
+    else if (Dir dot Z > 0.8)
+        PlayAnim('Dead3',, 0.2);
+    else
+        PlayAnim('Dead4',, 0.2);
 }
 
 defaultproperties

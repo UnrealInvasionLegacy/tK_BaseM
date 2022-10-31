@@ -1,9 +1,9 @@
 class SMPDamTypeQueenProj extends WeaponDamageType
-	abstract;
+    abstract;
 
 static function GetHitEffects(out class<xEmitter> HitEffects[4], int VictemHealth)
 {
-	HitEffects[0] = class'HitSmoke';
+    HitEffects[0] = class'HitSmoke';
 }
 
 defaultproperties

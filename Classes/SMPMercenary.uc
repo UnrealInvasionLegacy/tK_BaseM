@@ -30,411 +30,411 @@ var() bool bUseSeekingRocket;
 
 replication
 {
-	unreliable if (Role == ROLE_Authority)
-		mHitLocation, mHitNormal;
+    unreliable if (Role == ROLE_Authority)
+        mHitLocation, mHitNormal;
 }
 
 event PostBeginPlay()
 {
-	Super.PostBeginPlay();
-	RocketAmmo = spawn(RocketAmmoClass);
+    Super.PostBeginPlay();
+    RocketAmmo = spawn(RocketAmmoClass);
 }
 
 function PlayVictory()
 {
-	if (Controller == None)
-		return;
+    if (Controller == None)
+        return;
 
-	Controller.bPreparingMove = true;
-	Acceleration = vect(0,0,0);
-	bShotAnim = true;
-	PlaySound(Flip, SLOT_Interact);
-	SetAnimAction('Jump');
-	Controller.Destination = Location;
-	Controller.GotoState('TacticalMove','WaitForAnim');
+    Controller.bPreparingMove = true;
+    Acceleration = vect(0,0,0);
+    bShotAnim = true;
+    PlaySound(Flip, SLOT_Interact);
+    SetAnimAction('Jump');
+    Controller.Destination = Location;
+    Controller.GotoState('TacticalMove','WaitForAnim');
 }
 
 function Step()
 {
-	PlaySound(footstep1, SLOT_Interact,,,1500);
+    PlaySound(footstep1, SLOT_Interact,,,1500);
 }
 
 function WalkStep()
 {
-	PlaySound(footstep1, SLOT_Interact,0.2,,500);
+    PlaySound(footstep1, SLOT_Interact,0.2,,500);
 }
 
 function RangedAttack(Actor A)
 {
-	local float decision;
+    local float decision;
 
-	if (bShotAnim)
-		return;
+    if (bShotAnim)
+        return;
 
-	bShotAnim = true;
-	decision = FRand();
+    bShotAnim = true;
+    decision = FRand();
 
-	if (Physics == PHYS_Swimming)
-	{
-		SetAnimAction('SwimFire');
-	}
-	else if (VSize(A.Location - Location) < MeleeRange + CollisionRadius + A.CollisionRadius)
-	{
-		if (GetAnimSequence() == 'Swat')
-			decision += 0.2;
+    if (Physics == PHYS_Swimming)
+    {
+        SetAnimAction('SwimFire');
+    }
+    else if (VSize(A.Location - Location) < MeleeRange + CollisionRadius + A.CollisionRadius)
+    {
+        if (GetAnimSequence() == 'Swat')
+            decision += 0.2;
 
-		if (decision < 0.5)
-		{
-			SetAnimAction('Swat');
-		}
-		else
-		{
-			SetAnimAction('Punch');
-		}
-		PlaySound(Punch, SLOT_Interact);
-		Controller.bPreparingMove = true;
-		Acceleration = vect(0,0,0);
-	}
-	else if (Velocity == vect(0,0,0))
-	{
-		if (decision < 0.35)
-		{
-			SetAnimAction('Shoot');
-			SpawnRocket();
-		}
-		else
-		{
-			sprayoffset = 0;
-			PlaySound(WeaponSpray, SLOT_Interact);
-			SetAnimAction('Spray');
-		}
-		Controller.bPreparingMove = true;
-		Acceleration = vect(0,0,0);
-	}
-	else
-	{
-		if (decision < 0.35)
-		{
-			SetAnimAction('WalkFire');
-		}
-		else
-		{
-			sprayoffset = 0;
-			PlaySound(WeaponSpray, SLOT_Interact);
-			SetAnimAction('WalkSpray');
-		}
-	}
+        if (decision < 0.5)
+        {
+            SetAnimAction('Swat');
+        }
+        else
+        {
+            SetAnimAction('Punch');
+        }
+        PlaySound(Punch, SLOT_Interact);
+        Controller.bPreparingMove = true;
+        Acceleration = vect(0,0,0);
+    }
+    else if (Velocity == vect(0,0,0))
+    {
+        if (decision < 0.35)
+        {
+            SetAnimAction('Shoot');
+            SpawnRocket();
+        }
+        else
+        {
+            sprayoffset = 0;
+            PlaySound(WeaponSpray, SLOT_Interact);
+            SetAnimAction('Spray');
+        }
+        Controller.bPreparingMove = true;
+        Acceleration = vect(0,0,0);
+    }
+    else
+    {
+        if (decision < 0.35)
+        {
+            SetAnimAction('WalkFire');
+        }
+        else
+        {
+            sprayoffset = 0;
+            PlaySound(WeaponSpray, SLOT_Interact);
+            SetAnimAction('WalkSpray');
+        }
+    }
 }
 
 simulated function vector GetFireStart(vector X, vector Y, vector Z)
 {
-	if (sprayoffset >= 1 && sprayoffset <= 5)
-	{
-		if (GetAnimSequence() == 'Spray')
-			return Location + 1.25 * CollisionRadius * X - CollisionRadius * (0.2 * sprayoffset - 0.3) * Y;
-		else
-			return Location + 1.25 * CollisionRadius * X - CollisionRadius * (0.1 * sprayoffset - 0.1) * Y;
-	}
-	else
-		return Location + 0.9 * CollisionRadius * X - 0.9 * CollisionRadius * Y;
+    if (sprayoffset >= 1 && sprayoffset <= 5)
+    {
+        if (GetAnimSequence() == 'Spray')
+            return Location + 1.25 * CollisionRadius * X - CollisionRadius * (0.2 * sprayoffset - 0.3) * Y;
+        else
+            return Location + 1.25 * CollisionRadius * X - CollisionRadius * (0.1 * sprayoffset - 0.1) * Y;
+    }
+    else
+        return Location + 0.9 * CollisionRadius * X - 0.9 * CollisionRadius * Y;
 }
 
 simulated function SprayTarget()
 {
-	local rotator AdjRot;
-	local Vector StartTrace;
-	local vector RotX,RotY,RotZ;
+    local rotator AdjRot;
+    local Vector StartTrace;
+    local vector RotX,RotY,RotZ;
 
-	GetAxes(Rotation, RotX, RotY, RotZ);
-	StartTrace = GetFireStart(RotX, RotY, RotZ);
-	if (Controller != None)
-	{
-		if ( !SavedFireProperties.bInitialized )
-		{
-			SavedFireProperties.AmmoClass = MyAmmo.Class;
-			SavedFireProperties.ProjectileClass = MyAmmo.ProjectileClass;
-			SavedFireProperties.WarnTargetPct = MyAmmo.WarnTargetPct;
-			SavedFireProperties.MaxRange = MyAmmo.MaxRange;
-			SavedFireProperties.bTossed = MyAmmo.bTossed;
-			SavedFireProperties.bTrySplash = MyAmmo.bTrySplash;
-			SavedFireProperties.bLeadTarget = MyAmmo.bLeadTarget;
-			SavedFireProperties.bInstantHit = MyAmmo.bInstantHit;
-			SavedFireProperties.bInitialized = true;
-		}
-		AdjRot = Controller.AdjustAim(SavedFireProperties,StartTrace,600);
-	}
+    GetAxes(Rotation, RotX, RotY, RotZ);
+    StartTrace = GetFireStart(RotX, RotY, RotZ);
+    if (Controller != None)
+    {
+        if ( !SavedFireProperties.bInitialized )
+        {
+            SavedFireProperties.AmmoClass = MyAmmo.Class;
+            SavedFireProperties.ProjectileClass = MyAmmo.ProjectileClass;
+            SavedFireProperties.WarnTargetPct = MyAmmo.WarnTargetPct;
+            SavedFireProperties.MaxRange = MyAmmo.MaxRange;
+            SavedFireProperties.bTossed = MyAmmo.bTossed;
+            SavedFireProperties.bTrySplash = MyAmmo.bTrySplash;
+            SavedFireProperties.bLeadTarget = MyAmmo.bLeadTarget;
+            SavedFireProperties.bInstantHit = MyAmmo.bInstantHit;
+            SavedFireProperties.bInitialized = true;
+        }
+        AdjRot = Controller.AdjustAim(SavedFireProperties,StartTrace,600);
+    }
 
-	if (GetAnimSequence() == 'Dead5')
-		AdjRot.Yaw += 1500 * (2 - sprayOffset);
-	else
-		AdjRot.Yaw += 500 * (3 - sprayOffset);
+    if (GetAnimSequence() == 'Dead5')
+        AdjRot.Yaw += 1500 * (2 - sprayOffset);
+    else
+        AdjRot.Yaw += 500 * (3 - sprayOffset);
 
-	sprayoffset++;
+    sprayoffset++;
 
-	if (GetAnimSequence() == 'Dead5')
-		sprayoffset++;
+    if (GetAnimSequence() == 'Dead5')
+        sprayoffset++;
 
-	DoFireEffect();
-	DoTrace(StartTrace,AdjRot);
+    DoFireEffect();
+    DoTrace(StartTrace,AdjRot);
 }
 
 simulated function InitEffects()
 {
-	local vector RotX,RotY,RotZ;
-	local vector FireStartLoc;
+    local vector RotX,RotY,RotZ;
+    local vector FireStartLoc;
 
-	if (Level.NetMode == NM_DedicatedServer)
-		return;
+    if (Level.NetMode == NM_DedicatedServer)
+        return;
 
-	GetAxes(Rotation, RotX, RotY, RotZ);
-	FireStartLoc = GetFireStart(RotX, RotY, RotZ);
+    GetAxes(Rotation, RotX, RotY, RotZ);
+    FireStartLoc = GetFireStart(RotX, RotY, RotZ);
 
-	if ((FlashEmitterClass != None) && ((FlashEmitter == None) || FlashEmitter.bDeleteMe))
-		FlashEmitter = Spawn(FlashEmitterClass,,,FireStartLoc);
+    if ((FlashEmitterClass != None) && ((FlashEmitter == None) || FlashEmitter.bDeleteMe))
+        FlashEmitter = Spawn(FlashEmitterClass,,,FireStartLoc);
 
-	if ((SmokeEmitterClass != None) && ((SmokeEmitter == None) || SmokeEmitter.bDeleteMe))
-		SmokeEmitter = Spawn(SmokeEmitterClass,,,FireStartLoc);
+    if ((SmokeEmitterClass != None) && ((SmokeEmitter == None) || SmokeEmitter.bDeleteMe))
+        SmokeEmitter = Spawn(SmokeEmitterClass,,,FireStartLoc);
 }
 
 simulated function DoFireEffect()
 {
-	MakeNoise(1.0);
-	InitEffects();
-	FlashMuzzleFlash();
-	StartMuzzleSmoke();
+    MakeNoise(1.0);
+    InitEffects();
+    FlashMuzzleFlash();
+    StartMuzzleSmoke();
 }
 
 simulated function DoTrace(Vector Start, Rotator Dir)
 {
-	local Vector X, End, HitLocation, HitNormal, RefNormal;
-	local int Damage, ReflectNum;
-	local Actor Other;
-	local bool bDoReflect;
+    local Vector X, End, HitLocation, HitNormal, RefNormal;
+    local int Damage, ReflectNum;
+    local Actor Other;
+    local bool bDoReflect;
 
-	ReflectNum = 0;
-	while (true)
-	{
-		bDoReflect = false;
-		X = Vector(Dir);
-		End = Start + TraceRange * X;
+    ReflectNum = 0;
+    while (true)
+    {
+        bDoReflect = false;
+        X = Vector(Dir);
+        End = Start + TraceRange * X;
 
-		Other = Trace(HitLocation, HitNormal, End, Start, true);
-   		if (Role == ROLE_Authority)
-   		{
-			mHitLocation = HitLocation;
-			mHitNormal = HitNormal;
-		}
+        Other = Trace(HitLocation, HitNormal, End, Start, true);
+        if (Role == ROLE_Authority)
+        {
+            mHitLocation = HitLocation;
+            mHitNormal = HitNormal;
+        }
 
-		Damage = SprayDamage + Rand(SprayDamageMax - SprayDamage);
-		if (Other != None && (Other != Instigator || ReflectNum > 0))
-		{
-			if (Other.IsA('xPawn') && xPawn(Other).CheckReflect(HitLocation, RefNormal, Damage*0.25))
-			{
-				bDoReflect = true;
-				HitNormal = Vect(0,0,0);
-			}
-			else if (!Other.bWorldGeometry)
-			{
-				if (Level.NetMode != NM_Client)
-				{
-					Other.TakeDamage(Damage, self, HitLocation, Momentum*X, MyDamageType);
-					HitNormal = Vect(0,0,0);
-				}
-			}
-			else
-			{
-				SpawnHitEffect(Other, mHitLocation, mHitNormal);
-			}
-		}
-		else
-		{
-			HitLocation = End;
-			HitNormal = Vect(0,0,0);
-		}
+        Damage = SprayDamage + Rand(SprayDamageMax - SprayDamage);
+        if (Other != None && (Other != Instigator || ReflectNum > 0))
+        {
+            if (Other.IsA('xPawn') && xPawn(Other).CheckReflect(HitLocation, RefNormal, Damage*0.25))
+            {
+                bDoReflect = true;
+                HitNormal = Vect(0,0,0);
+            }
+            else if (!Other.bWorldGeometry)
+            {
+                if (Level.NetMode != NM_Client)
+                {
+                    Other.TakeDamage(Damage, self, HitLocation, Momentum*X, MyDamageType);
+                    HitNormal = Vect(0,0,0);
+                }
+            }
+            else
+            {
+                SpawnHitEffect(Other, mHitLocation, mHitNormal);
+            }
+        }
+        else
+        {
+            HitLocation = End;
+            HitNormal = Vect(0,0,0);
+        }
 
-		UpdateTracer();
+        UpdateTracer();
 
-		if (bDoReflect && ++ReflectNum < 4)
-		{
-			Start = HitLocation;
-			Dir = Rotator(RefNormal);
-		}
-		else
-		{
-			break;
-		}
-	}
-	return;
+        if (bDoReflect && ++ReflectNum < 4)
+        {
+            Start = HitLocation;
+            Dir = Rotator(RefNormal);
+        }
+        else
+        {
+            break;
+        }
+    }
+    return;
 }
 
 simulated function UpdateTracer()
 {
-	local float len, invSpeed, hitDist;
-	local Vector RotX,RotY,RotZ;
-	local vector FireStart;
+    local float len, invSpeed, hitDist;
+    local Vector RotX,RotY,RotZ;
+    local vector FireStart;
 
-	if (Level.NetMode == NM_DedicatedServer)
-		return;
+    if (Level.NetMode == NM_DedicatedServer)
+        return;
 
-	mTracerUpdateTime = Level.TimeSeconds;
-	GetAxes(Rotation,RotX,RotY,RotZ);
-	FireStart=GetFireStart(RotX,RotY,RotZ);
-	mHitRot = rotator(mHitLocation - FireStart);
+    mTracerUpdateTime = Level.TimeSeconds;
+    GetAxes(Rotation,RotX,RotY,RotZ);
+    FireStart=GetFireStart(RotX,RotY,RotZ);
+    mHitRot = rotator(mHitLocation - FireStart);
 
-	if (mTracer == None)
-		mTracer = Spawn(mTracerClass);
+    if (mTracer == None)
+        mTracer = Spawn(mTracerClass);
 
-	if (Level.bDropDetail || Level.DetailMode == DM_Low)
-		mTracerFreq = 2 * Default.mTracerFreq;
-	else
-		mTracerFreq = Default.mTracerFreq;
+    if (Level.bDropDetail || Level.DetailMode == DM_Low)
+        mTracerFreq = 2 * Default.mTracerFreq;
+    else
+        mTracerFreq = Default.mTracerFreq;
 
-	if (mTracer != None && Level.TimeSeconds > mLastTracerTime + mTracerFreq)
-	{
-		mTracer.SetLocation(FireStart);
-		mTracer.SetRotation(mHitRot);
-		hitDist = VSize(mHitLocation - FireStart);
+    if (mTracer != None && Level.TimeSeconds > mLastTracerTime + mTracerFreq)
+    {
+        mTracer.SetLocation(FireStart);
+        mTracer.SetRotation(mHitRot);
+        hitDist = VSize(mHitLocation - FireStart);
 
-		len = mTracerLen * hitDist;
-		invSpeed = 1.f / mTracer.mSpeedRange[1];
+        len = mTracerLen * hitDist;
+        invSpeed = 1.f / mTracer.mSpeedRange[1];
 
-		mTracer.mLifeRange[0] = len * invSpeed;
-		mTracer.mLifeRange[1] = mTracer.mLifeRange[0];
-		mTracer.mSpawnVecB.Z = -1.f * (1.0-mTracerLen) * hitDist * invSpeed;
-		mTracer.mStartParticles = 1;
+        mTracer.mLifeRange[0] = len * invSpeed;
+        mTracer.mLifeRange[1] = mTracer.mLifeRange[0];
+        mTracer.mSpawnVecB.Z = -1.f * (1.0-mTracerLen) * hitDist * invSpeed;
+        mTracer.mStartParticles = 1;
 
-		mLastTracerTime = Level.TimeSeconds;
-	}
+        mLastTracerTime = Level.TimeSeconds;
+    }
 }
 
 simulated function SpawnHitEffect(Actor Other, vector HitLocation, vector HitNormal)
 {
-	Spawn(class'HitEffect'.static.GetHitEffect(Other, HitLocation, HitNormal),,, HitLocation, Rotator(HitNormal));
+    Spawn(class'HitEffect'.static.GetHitEffect(Other, HitLocation, HitNormal),,, HitLocation, Rotator(HitNormal));
 }
 
 simulated function FlashMuzzleFlash()
 {
-	local Vector RotX,RotY,RotZ;
+    local Vector RotX,RotY,RotZ;
 
-	if (FlashEmitter != None)
-	{
-		GetAxes(Rotation,RotX,RotY,RotZ);
-		FlashEmitter.SetLocation(GetFireStart(RotX, RotY, RotZ));
-		FlashEmitter.SetRotation(Rotation);
-		FlashEmitter.Trigger(self, self);
-	}
+    if (FlashEmitter != None)
+    {
+        GetAxes(Rotation,RotX,RotY,RotZ);
+        FlashEmitter.SetLocation(GetFireStart(RotX, RotY, RotZ));
+        FlashEmitter.SetRotation(Rotation);
+        FlashEmitter.Trigger(self, self);
+    }
 }
 
 simulated function StartMuzzleSmoke()
 {
-	local Vector RotX,RotY,RotZ;
+    local Vector RotX,RotY,RotZ;
 
-	if ( !Level.bDropDetail && (SmokeEmitter != None) )
-	{
-   		GetAxes(Rotation,RotX,RotY,RotZ);
-		SmokeEmitter.SetLocation(GetFireStart(RotX, RotY, RotZ));
-		SmokeEmitter.SetRotation(Rotation);
-		SmokeEmitter.Trigger(self, self);
-	}
+    if ( !Level.bDropDetail && (SmokeEmitter != None) )
+    {
+        GetAxes(Rotation,RotX,RotY,RotZ);
+        SmokeEmitter.SetLocation(GetFireStart(RotX, RotY, RotZ));
+        SmokeEmitter.SetRotation(Rotation);
+        SmokeEmitter.Trigger(self, self);
+    }
 }
 
 function SpawnRocket()
 {
-	local vector RotX,RotY,RotZ,StartLoc;
-	local SMPMercRocket R;
+    local vector RotX,RotY,RotZ,StartLoc;
+    local SMPMercRocket R;
 
-	GetAxes(Rotation, RotX, RotY, RotZ);
-	StartLoc=GetFireStart(RotX, RotY, RotZ);
-	if ( !RocketFireProperties.bInitialized )
-	{
-		RocketFireProperties.AmmoClass = RocketAmmo.Class;
-		RocketFireProperties.ProjectileClass = RocketAmmo.default.ProjectileClass;
-		RocketFireProperties.WarnTargetPct = RocketAmmo.WarnTargetPct;
-		RocketFireProperties.MaxRange = RocketAmmo.MaxRange;
-		RocketFireProperties.bTossed = RocketAmmo.bTossed;
-		RocketFireProperties.bTrySplash = RocketAmmo.bTrySplash;
-		RocketFireProperties.bLeadTarget = RocketAmmo.bLeadTarget;
-		RocketFireProperties.bInstantHit = RocketAmmo.bInstantHit;
-		RocketFireProperties.bInitialized = true;
-	}
+    GetAxes(Rotation, RotX, RotY, RotZ);
+    StartLoc=GetFireStart(RotX, RotY, RotZ);
+    if ( !RocketFireProperties.bInitialized )
+    {
+        RocketFireProperties.AmmoClass = RocketAmmo.Class;
+        RocketFireProperties.ProjectileClass = RocketAmmo.default.ProjectileClass;
+        RocketFireProperties.WarnTargetPct = RocketAmmo.WarnTargetPct;
+        RocketFireProperties.MaxRange = RocketAmmo.MaxRange;
+        RocketFireProperties.bTossed = RocketAmmo.bTossed;
+        RocketFireProperties.bTrySplash = RocketAmmo.bTrySplash;
+        RocketFireProperties.bLeadTarget = RocketAmmo.bLeadTarget;
+        RocketFireProperties.bInstantHit = RocketAmmo.bInstantHit;
+        RocketFireProperties.bInitialized = true;
+    }
 
-	R = SMPMercRocket(Spawn(RocketAmmo.ProjectileClass,,,StartLoc,Controller.AdjustAim(RocketFireProperties,StartLoc,600)));
-	PlaySound(Sound'WeaponSounds.RocketLauncherFire');
-	if (bUseSeekingRocket && R != None)
-		R.Seeking = Controller.Enemy;
+    R = SMPMercRocket(Spawn(RocketAmmo.ProjectileClass,,,StartLoc,Controller.AdjustAim(RocketFireProperties,StartLoc,600)));
+    PlaySound(Sound'WeaponSounds.RocketLauncherFire');
+    if (bUseSeekingRocket && R != None)
+        R.Seeking = Controller.Enemy;
 }
 
 function HitDamageTarget()
 {
-	if (MeleeDamageTarget(PunchDamage, (PunchDamage * 1000 * Normal(Controller.Target.Location - Location))))
-		PlaySound(PunchHit, SLOT_Interact);
+    if (MeleeDamageTarget(PunchDamage, (PunchDamage * 1000 * Normal(Controller.Target.Location - Location))))
+        PlaySound(PunchHit, SLOT_Interact);
 }
 
 simulated function PlayDirectionalHit(Vector HitLoc)
 {
-	local Vector X,Y,Z, Dir;
+    local Vector X,Y,Z, Dir;
 
-	GetAxes(Rotation, X,Y,Z);
-	HitLoc.Z = Location.Z;
+    GetAxes(Rotation, X,Y,Z);
+    HitLoc.Z = Location.Z;
 
-	if (VSize(Location - HitLoc) < 1.0)
-		Dir = VRand();
-	else
-		Dir = -Normal(Location - HitLoc);
+    if (VSize(Location - HitLoc) < 1.0)
+        Dir = VRand();
+    else
+        Dir = -Normal(Location - HitLoc);
 
-	if (Dir Dot X > 0.7 || Dir == vect(0,0,0))
-	{
-		PlayAnim('GutHit',, 0.1);
-	}
-	else if (Dir Dot X < -0.7)
-	{
-		//PlayAnim('Hit',, 0.1);
-	}
-	else if (Dir Dot Y > 0)
-	{
-		PlayAnim('RightHit',, 0.1);
-	}
-	else
-	{
-		PlayAnim('LeftHit',, 0.1);
-	}
+    if (Dir Dot X > 0.7 || Dir == vect(0,0,0))
+    {
+        PlayAnim('GutHit',, 0.1);
+    }
+    else if (Dir Dot X < -0.7)
+    {
+        //PlayAnim('Hit',, 0.1);
+    }
+    else if (Dir Dot Y > 0)
+    {
+        PlayAnim('RightHit',, 0.1);
+    }
+    else
+    {
+        PlayAnim('LeftHit',, 0.1);
+    }
 }
 
 simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 {
-	AmbientSound = None;
-	bCanTeleport = false;
-	bReplicateMovement = false;
-	bTearOff = true;
-	bPlayedDeath = true;
+    AmbientSound = None;
+    bCanTeleport = false;
+    bReplicateMovement = false;
+    bTearOff = true;
+    bPlayedDeath = true;
 
-	HitDamageType = DamageType;
-	TakeHitLocation = HitLoc;
-	LifeSpan = RagdollLifeSpan;
+    HitDamageType = DamageType;
+    TakeHitLocation = HitLoc;
+    LifeSpan = RagdollLifeSpan;
 
-	GotoState('Dying');
+    GotoState('Dying');
 
-	Velocity += TearOffMomentum;
-	BaseEyeHeight = Default.BaseEyeHeight;
-	SetPhysics(PHYS_Falling);
+    Velocity += TearOffMomentum;
+    BaseEyeHeight = Default.BaseEyeHeight;
+    SetPhysics(PHYS_Falling);
 
-	if ((DamageType == class'DamTypeSniperHeadShot') || ((HitLoc.Z > Location.Z + 0.75 * CollisionHeight) && (FRand() > 0.5)
-		&& (DamageType != class'DamTypeAssaultBullet') && (DamageType != class'DamTypeMinigunBullet') && (DamageType != class'DamTypeFlakChunk')))
-	{
-		PlayAnim('Dead5',1,0.05);
-		CreateGib('head',DamageType,Rotation);
-		return;
-	}
+    if ((DamageType == class'DamTypeSniperHeadShot') || ((HitLoc.Z > Location.Z + 0.75 * CollisionHeight) && (FRand() > 0.5)
+        && (DamageType != class'DamTypeAssaultBullet') && (DamageType != class'DamTypeMinigunBullet') && (DamageType != class'DamTypeFlakChunk')))
+    {
+        PlayAnim('Dead5',1,0.05);
+        CreateGib('head',DamageType,Rotation);
+        return;
+    }
 
-	if (Velocity.Z > 300)
-	{
-		if (FRand() < 0.6)
-			PlayAnim('Dead2',1.2,0.05);
-		else
-			PlayAnim('Death',1.2,0.05);
-		return;
-	}
-	PlayAnim(DeathAnim[Rand(4)],1.2,0.05);
+    if (Velocity.Z > 300)
+    {
+        if (FRand() < 0.6)
+            PlayAnim('Dead2',1.2,0.05);
+        else
+            PlayAnim('Death',1.2,0.05);
+        return;
+    }
+    PlayAnim(DeathAnim[Rand(4)],1.2,0.05);
 }
 
 defaultproperties

@@ -2,28 +2,28 @@ class SMPTentacleProj extends Projectile;
 
 simulated function PostBeginPlay()
 {
-	if (bDeleteMe || IsInState('Dying'))
-		return;
- 	Velocity = (speed + Rand(MaxSpeed - speed)) * vector(Rotation);
-	PlaySound(SpawnSound);
+    if (bDeleteMe || IsInState('Dying'))
+        return;
+    Velocity = (speed + Rand(MaxSpeed - speed)) * vector(Rotation);
+    PlaySound(SpawnSound);
 }
 
 simulated function ProcessTouch (Actor Other, Vector HitLocation)
 {
-	if (Other != instigator)
-	{
-		if (Role == ROLE_Authority)
-			Other.TakeDamage(Damage, Instigator, HitLocation, MomentumTransfer * Normal(Velocity), MyDamageType);
-	}
-	Explode(HitLocation, vect(0,0,1));
+    if (Other != instigator)
+    {
+        if (Role == ROLE_Authority)
+            Other.TakeDamage(Damage, Instigator, HitLocation, MomentumTransfer * Normal(Velocity), MyDamageType);
+    }
+    Explode(HitLocation, vect(0,0,1));
 }
 
 simulated function Explode(vector HitLocation, vector HitNormal)
 {
     if (EffectIsRelevant(Location,false))
-		Spawn(class'WallSparks',,, HitLocation, rotator(HitNormal));
-	PlaySound(ImpactSound);
-	Destroy();
+        Spawn(class'WallSparks',,, HitLocation, rotator(HitNormal));
+    PlaySound(ImpactSound);
+    Destroy();
 }
 
 defaultproperties

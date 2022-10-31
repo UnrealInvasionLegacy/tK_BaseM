@@ -1,5 +1,5 @@
 class SMPMerceAmmoDamType extends DamTypeMinigunBullet
-	abstract;
+    abstract;
 
 defaultproperties
 {

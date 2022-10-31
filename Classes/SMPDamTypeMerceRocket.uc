@@ -1,5 +1,5 @@
 class SMPDamTypeMerceRocket extends DamTypeRocket
-	abstract;
+    abstract;
 
 defaultproperties
 {

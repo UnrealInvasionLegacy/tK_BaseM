@@ -2,40 +2,40 @@ class SMPGiantGasBagBelch extends GasBagBelch;
 
 simulated function PostBeginPlay()
 {
-	super.PostBeginPlay();
-	SmokeTrail.SetDrawScale(SmokeTrail.DrawScale * 2.5);
+    super.PostBeginPlay();
+    SmokeTrail.SetDrawScale(SmokeTrail.DrawScale * 2.5);
 }
 
 simulated function Explode(vector HitLocation, vector HitNormal)
 {
-	local Actor A;
+    local Actor A;
 
-	PlaySound(sound'WeaponSounds.BExplosion3',,2.5*TransientSoundVolume);
-	A = spawn(class'FlakExplosion',,,HitLocation + HitNormal*16);
-	if (A != None)
-	{
-		A.SetDrawScale(A.DrawScale*2);
-		A = None;
-	}
+    PlaySound(sound'WeaponSounds.BExplosion3',,2.5*TransientSoundVolume);
+    A = spawn(class'FlakExplosion',,,HitLocation + HitNormal*16);
+    if (A != None)
+    {
+        A.SetDrawScale(A.DrawScale*2);
+        A = None;
+    }
 
-	A = spawn(class'FlashExplosion',,,HitLocation + HitNormal*16);
-	if (A != None)
-	{
-		A.SetDrawScale(A.DrawScale*2);
-		A = None;
-	}
+    A = spawn(class'FlashExplosion',,,HitLocation + HitNormal*16);
+    if (A != None)
+    {
+        A.SetDrawScale(A.DrawScale*2);
+        A = None;
+    }
 
-	if ((ExplosionDecal != None) && (Level.NetMode != NM_DedicatedServer))
-		A = Spawn(ExplosionDecal,self,,Location, rotator(-HitNormal));
+    if ((ExplosionDecal != None) && (Level.NetMode != NM_DedicatedServer))
+        A = Spawn(ExplosionDecal,self,,Location, rotator(-HitNormal));
 
-	if (A != None)
-	{
-		A.SetDrawScale(A.DrawScale*2);
-		A = None;
-	}
+    if (A != None)
+    {
+        A.SetDrawScale(A.DrawScale*2);
+        A = None;
+    }
 
-	BlowUp(HitLocation);
-	Destroy();
+    BlowUp(HitLocation);
+    Destroy();
 }
 
 defaultproperties

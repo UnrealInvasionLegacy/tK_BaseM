@@ -2,19 +2,19 @@ class SMPTitanBoulder extends SMPTitanBigRock;
 
 function MakeSound()
 {
-	local float soundRad;
+    local float soundRad;
 
-	soundRad = 90 * DrawScale;
-	PlaySound(ImpactSound, SLOT_Misc, DrawScale/20,,soundRad);
+    soundRad = 90 * DrawScale;
+    PlaySound(ImpactSound, SLOT_Misc, DrawScale/20,,soundRad);
 }
 
 simulated function HitWall (vector HitNormal, actor Wall)
 {
-	Velocity = 0.75 * (Velocity - 2 * HitNormal * (Velocity Dot HitNormal));
-	SetRotation(rotator(HitNormal));
-	setDrawScale(DrawScale* 0.7);
-	SpawnChunks(8);
-	Destroy();
+    Velocity = 0.75 * (Velocity - 2 * HitNormal * (Velocity Dot HitNormal));
+    SetRotation(rotator(HitNormal));
+    setDrawScale(DrawScale* 0.7);
+    SpawnChunks(8);
+    Destroy();
 }
 
 defaultproperties

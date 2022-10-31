@@ -7,91 +7,91 @@ const TargetRadius = 1200;
 
 event PostBeginPlay()
 {
-	Super.PostBeginPlay();
-	SetTimer(1, true);
+    Super.PostBeginPlay();
+    SetTimer(1, true);
 }
 
 simulated function Timer()
 {
-	local Monster Other;
+    local Monster Other;
 
-	foreach VisibleCollidingActors(class'Monster', Other, TargetRadius, Location)
-	{
-		if (!Other.bAmbientCreature && Other.Controller != None)
-			Other.Controller.Trigger(none,self);
-	}
+    foreach VisibleCollidingActors(class'Monster', Other, TargetRadius, Location)
+    {
+        if (!Other.bAmbientCreature && Other.Controller != None)
+            Other.Controller.Trigger(none,self);
+    }
 }
 
 simulated function PlayDirectionalHit(Vector HitLoc)
 {
-	if (FRand() < 0.6)
-		TweenAnim('TakeHit', 0.05);
-	else if (FRand() < 0.1)
-		TweenAnim('BigHit', 0.05);
-	else
-		TweenAnim('TakeHit2', 0.05);
+    if (FRand() < 0.6)
+        TweenAnim('TakeHit', 0.05);
+    else if (FRand() < 0.1)
+        TweenAnim('BigHit', 0.05);
+    else
+        TweenAnim('TakeHit2', 0.05);
 }
 
 simulated function AnimEnd(int Channel)
 {
-	local name Anim;
-	local float frame,rate;
+    local name Anim;
+    local float frame,rate;
 
-	if (Channel == 0)
-	{
-		GetAnimParams(0, Anim,frame,rate);
-		if (Anim == 'Root')
-			IdleWeaponAnim = 'Chew';
-		else if ((Anim == 'Chew') && (FRand() < 0.5))
-			IdleWeaponAnim = 'Swish';
-		else if ((Anim == 'Swish') && (FRand() < 0.5))
-			IdleWeaponAnim = 'Poop';
-		else
-			IdleWeaponAnim = 'Root';
-	}
-	Super.AnimEnd(Channel);
+    if (Channel == 0)
+    {
+        GetAnimParams(0, Anim,frame,rate);
+        if (Anim == 'Root')
+            IdleWeaponAnim = 'Chew';
+        else if ((Anim == 'Chew') && (FRand() < 0.5))
+            IdleWeaponAnim = 'Swish';
+        else if ((Anim == 'Swish') && (FRand() < 0.5))
+            IdleWeaponAnim = 'Poop';
+        else
+            IdleWeaponAnim = 'Root';
+    }
+    Super.AnimEnd(Channel);
 }
 
 simulated function Step()
 {
-	PlaySound(FootStep[Rand(2)], SLOT_Interact);
+    PlaySound(FootStep[Rand(2)], SLOT_Interact);
 }
 
 simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 {
-	AmbientSound = None;
-	bCanTeleport = false;
-	bReplicateMovement = false;
-	bTearOff = true;
-	bPlayedDeath = true;
+    AmbientSound = None;
+    bCanTeleport = false;
+    bReplicateMovement = false;
+    bTearOff = true;
+    bPlayedDeath = true;
 
-	HitDamageType = DamageType;
-	TakeHitLocation = HitLoc;
-	LifeSpan = RagdollLifeSpan;
+    HitDamageType = DamageType;
+    TakeHitLocation = HitLoc;
+    LifeSpan = RagdollLifeSpan;
 
-	GotoState('Dying');
+    GotoState('Dying');
 
-	Velocity += TearOffMomentum;
-	BaseEyeHeight = Default.BaseEyeHeight;
-	SetPhysics(PHYS_Falling);
+    Velocity += TearOffMomentum;
+    BaseEyeHeight = Default.BaseEyeHeight;
+    SetPhysics(PHYS_Falling);
 
-	if ((DamageType == class'DamTypeSniperHeadShot') || ((HitLoc.Z > Location.Z + 0.75 * CollisionHeight) && (FRand() > 0.5)
-			&& (DamageType != class'DamTypeAssaultBullet') && (DamageType != class'DamTypeMinigunBullet') && (DamageType != class'DamTypeFlakChunk')))
-	{
-		PlayAnim('Dead3',1,0.05);
-		CreateGib('head',DamageType,Rotation);
-		return;
-	}
+    if ((DamageType == class'DamTypeSniperHeadShot') || ((HitLoc.Z > Location.Z + 0.75 * CollisionHeight) && (FRand() > 0.5)
+            && (DamageType != class'DamTypeAssaultBullet') && (DamageType != class'DamTypeMinigunBullet') && (DamageType != class'DamTypeFlakChunk')))
+    {
+        PlayAnim('Dead3',1,0.05);
+        CreateGib('head',DamageType,Rotation);
+        return;
+    }
 
-	if (Velocity.Z > 300)
-	{
-		if (FRand() < 0.5)
-			PlayAnim('Dead',1.2,0.05);
-		else
-			PlayAnim('Dead2',1.2,0.05);
-		return;
-	}
-	PlayAnim(DeathAnim[Rand(3)],1.2,0.05);
+    if (Velocity.Z > 300)
+    {
+        if (FRand() < 0.5)
+            PlayAnim('Dead',1.2,0.05);
+        else
+            PlayAnim('Dead2',1.2,0.05);
+        return;
+    }
+    PlayAnim(DeathAnim[Rand(3)],1.2,0.05);
 }
 
 defaultproperties

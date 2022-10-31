@@ -4,17 +4,17 @@ var int Health;
 
 function Touch( actor Other )
 {
-	if (Other.IsA('xPawn') && !Other.IsA('Monster'))
-		Destroy();
+    if (Other.IsA('xPawn') && !Other.IsA('Monster'))
+        Destroy();
 }
 
 simulated function Flash(int Drain)
 {
-	Super.Flash(Drain);
+    Super.Flash(Drain);
 
-	Health -= Drain;
-	if (Health < 0)
-		Destroy();
+    Health -= Drain;
+    if (Health < 0)
+        Destroy();
 }
 
 defaultproperties

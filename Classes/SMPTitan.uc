@@ -13,193 +13,193 @@ var() float ProjectileSpeed, ProjectileMaxSpeed;
 
 singular event BaseChange()
 {
-	local float decorMass;
+    local float decorMass;
 
-	if (bInterpolating)
-		return;
+    if (bInterpolating)
+        return;
 
-	if ((Base == None) && (Physics == PHYS_None))
-	{
-		SetPhysics(PHYS_Falling);
-	}
-	else if (Pawn(Base) != None)
-	{
-		if ( !Pawn(Base).bCanBeBaseForPawns )
-		{
-			Base.TakeDamage( 50000, Self,Location,0.5 * Velocity , class'Crushed');
-			JumpOffPawn();
-			SetPhysics(PHYS_Falling);
-		}
-	}
-	else if ((Decoration(Base) != None) && (Velocity.Z < -400))
-	{
-		decorMass = FMax(Decoration(Base).Mass, 1);
-		Base.TakeDamage((-2* Mass/decorMass * Velocity.Z/4), Self, Location, 0.5 * Velocity, class'Crushed');
-	}
+    if ((Base == None) && (Physics == PHYS_None))
+    {
+        SetPhysics(PHYS_Falling);
+    }
+    else if (Pawn(Base) != None)
+    {
+        if ( !Pawn(Base).bCanBeBaseForPawns )
+        {
+            Base.TakeDamage( 50000, Self,Location,0.5 * Velocity , class'Crushed');
+            JumpOffPawn();
+            SetPhysics(PHYS_Falling);
+        }
+    }
+    else if ((Decoration(Base) != None) && (Velocity.Z < -400))
+    {
+        decorMass = FMax(Decoration(Base).Mass, 1);
+        Base.TakeDamage((-2* Mass/decorMass * Velocity.Z/4), Self, Location, 0.5 * Velocity, class'Crushed');
+    }
 }
 
 function Landed(vector HitNormal)
 {
-	local Pawn Thrown;
+    local Pawn Thrown;
 
-	if (Velocity.Z < -10)
-	{
-		foreach CollidingActors(class 'Pawn', Thrown, Mass)
-			ThrowOther(Thrown,Mass/12+(-0.5*Velocity.Z));
-	}
-	super.Landed(HitNormal);
+    if (Velocity.Z < -10)
+    {
+        foreach CollidingActors(class 'Pawn', Thrown, Mass)
+            ThrowOther(Thrown,Mass/12+(-0.5*Velocity.Z));
+    }
+    super.Landed(HitNormal);
 }
 
 function bool SameSpeciesAs(Pawn P)
 {
-	return (Monster(P) != None && P.IsA('Monster'));
+    return (Monster(P) != None && P.IsA('Monster'));
 }
 
 function PlayVictory()
 {
-	Controller.bPreparingMove = true;
-	Acceleration = vect(0,0,0);
-	bShotAnim = true;
-	PlaySound(sound'chestB2Ti',SLOT_Interact);
-	SetAnimAction('TChest');
-	Controller.Destination = Location;
-	Controller.GotoState('TacticalMove','WaitForAnim');
+    Controller.bPreparingMove = true;
+    Acceleration = vect(0,0,0);
+    bShotAnim = true;
+    PlaySound(sound'chestB2Ti',SLOT_Interact);
+    SetAnimAction('TChest');
+    Controller.Destination = Location;
+    Controller.GotoState('TacticalMove','WaitForAnim');
 }
 
 function PunchDamageTarget()
 {
-	if (Controller == None || Controller.Target == None)
-		return;
+    if (Controller == None || Controller.Target == None)
+        return;
 
-	if (MeleeDamageTarget(PunchDamage, (70000.0 * Normal(Controller.Target.Location - Location))))
-	{
-		PlaySound(Slap, SLOT_Interact);
-		PlaySound(Slap, SLOT_Misc);
-	}
+    if (MeleeDamageTarget(PunchDamage, (70000.0 * Normal(Controller.Target.Location - Location))))
+    {
+        PlaySound(Slap, SLOT_Interact);
+        PlaySound(Slap, SLOT_Misc);
+    }
 }
 
 function SlapDamageTarget()
 {
-	local vector X,Y,Z;
+    local vector X,Y,Z;
 
-	if (Controller == None || Controller.Target == None)
-		return;
+    if (Controller == None || Controller.Target == None)
+        return;
 
-	GetAxes(Rotation,X,Y,Z);
-	if (MeleeDamageTarget(SlapDamage, (70000.0 * (Y + vect(0,0,1)))))
-	{
-		PlaySound(Slap, SLOT_Interact);
-		PlaySound(Slap, SLOT_Misc);
-	}
+    GetAxes(Rotation,X,Y,Z);
+    if (MeleeDamageTarget(SlapDamage, (70000.0 * (Y + vect(0,0,1)))))
+    {
+        PlaySound(Slap, SLOT_Interact);
+        PlaySound(Slap, SLOT_Misc);
+    }
 }
 
 function RangedAttack(Actor A)
 {
-	local float decision;
+    local float decision;
 
-	if (bShotAnim)
-		return;
+    if (bShotAnim)
+        return;
 
-	bShotAnim = true;
-	decision = FRand();
+    bShotAnim = true;
+    decision = FRand();
 
-	if (VSize(A.Location - Location) < MeleeRange*CollisionRadius/default.CollisionRadius + CollisionRadius + A.CollisionRadius)
-	{
-		if (decision < 0.6)
-		{
-			SetAnimAction('TSlap001');
-			PlaySound(sound'Punch1Ti', SLOT_Interact);
-			PlaySound(sound'Punch1Ti', SLOT_Misc);
-		}
-		else
-		{
-			SetAnimAction('TPunc001');
-			PlaySound(swing, SLOT_Interact);
-			PlaySound(swing, SLOT_Misc);
-		}
-		Controller.bPreparingMove = true;
-		Acceleration = vect(0,0,0);
-		bStomped = false;
-	}
-	else if (Controller.InLatentExecution(Controller.LATENT_MOVETOWARD))
-	{
-		SetAnimAction(MovementAnims[0]);
-		bThrowed = false;
-		return;
-	}
-	else if (decision < 0.70 || bStomped)
-	{
-		SetAnimAction('TThro001');
-		Controller.bPreparingMove = true;
-		Acceleration = vect(0,0,0);
-		PlaySound(throw, SLOT_Interact);
-	}
-	else
-	{
-		SetAnimAction('TStom001');
-		Controller.bPreparingMove = true;
-		Acceleration = vect(0,0,0);
-		PlaySound(StompSound, SLOT_Interact);
-	}
+    if (VSize(A.Location - Location) < MeleeRange*CollisionRadius/default.CollisionRadius + CollisionRadius + A.CollisionRadius)
+    {
+        if (decision < 0.6)
+        {
+            SetAnimAction('TSlap001');
+            PlaySound(sound'Punch1Ti', SLOT_Interact);
+            PlaySound(sound'Punch1Ti', SLOT_Misc);
+        }
+        else
+        {
+            SetAnimAction('TPunc001');
+            PlaySound(swing, SLOT_Interact);
+            PlaySound(swing, SLOT_Misc);
+        }
+        Controller.bPreparingMove = true;
+        Acceleration = vect(0,0,0);
+        bStomped = false;
+    }
+    else if (Controller.InLatentExecution(Controller.LATENT_MOVETOWARD))
+    {
+        SetAnimAction(MovementAnims[0]);
+        bThrowed = false;
+        return;
+    }
+    else if (decision < 0.70 || bStomped)
+    {
+        SetAnimAction('TThro001');
+        Controller.bPreparingMove = true;
+        Acceleration = vect(0,0,0);
+        PlaySound(throw, SLOT_Interact);
+    }
+    else
+    {
+        SetAnimAction('TStom001');
+        Controller.bPreparingMove = true;
+        Acceleration = vect(0,0,0);
+        PlaySound(StompSound, SLOT_Interact);
+    }
 }
 
 function Stomp()
 {
-	local Pawn Thrown;
+    local Pawn Thrown;
 
-	TriggerEvent(StompEvent,Self, Instigator);
- 	Mass = default.Mass*(CollisionRadius/default.CollisionRadius);
-	foreach CollidingActors(class 'Pawn', Thrown, Mass)
-		ThrowOther(Thrown,Mass/4);
+    TriggerEvent(StompEvent,Self, Instigator);
+    Mass = default.Mass*(CollisionRadius/default.CollisionRadius);
+    foreach CollidingActors(class 'Pawn', Thrown, Mass)
+        ThrowOther(Thrown,Mass/4);
 
-	PlaySound(Step, SLOT_Interact, 24);
-	bStomped = true;
+    PlaySound(Step, SLOT_Interact, 24);
+    bStomped = true;
 }
 
 function FootStep()
 {
-	local Pawn Thrown;
+    local Pawn Thrown;
 
-	TriggerEvent(StepEvent,Self, Instigator);
-	foreach CollidingActors( class 'Pawn', Thrown,Mass*0.5)
-		ThrowOther(Thrown,Mass/12);
+    TriggerEvent(StepEvent,Self, Instigator);
+    foreach CollidingActors( class 'Pawn', Thrown,Mass*0.5)
+        ThrowOther(Thrown,Mass/12);
 
-	PlaySound(Step, SLOT_Interact, 24);
+    PlaySound(Step, SLOT_Interact, 24);
 }
 
 function ThrowOther(Pawn Other,int Power)
 {
-	local float dist, shake;
-	local vector Momentum;
+    local float dist, shake;
+    local vector Momentum;
 
-	if (Other.Mass >= Mass)
-		return;
+    if (Other.Mass >= Mass)
+        return;
 
-	if (xPawn(Other) == None)
-	{
-		if (Power < 400 || (Other.Physics != PHYS_Walking))
-			return;
-		dist = VSize(Location - Other.Location);
-		if (dist > Mass)
-			return;
-	}
-	else
-	{
-		dist = VSize(Location - Other.Location);
-		shake = 0.4*FMax(500, Mass - dist);
-		shake = FMin(2000,shake);
-		if (dist > Mass)
-			return;
-		if (Other.Controller != None)
-			Other.Controller.ShakeView(vect(0.0,0.02,0.0)*shake, vect(0,1000,0),0.003*shake, vect(0.02,0.02,0.02)*shake, vect(1000,1000,1000),0.003*shake);
+    if (xPawn(Other) == None)
+    {
+        if (Power < 400 || (Other.Physics != PHYS_Walking))
+            return;
+        dist = VSize(Location - Other.Location);
+        if (dist > Mass)
+            return;
+    }
+    else
+    {
+        dist = VSize(Location - Other.Location);
+        shake = 0.4*FMax(500, Mass - dist);
+        shake = FMin(2000,shake);
+        if (dist > Mass)
+            return;
+        if (Other.Controller != None)
+            Other.Controller.ShakeView(vect(0.0,0.02,0.0)*shake, vect(0,1000,0),0.003*shake, vect(0.02,0.02,0.02)*shake, vect(1000,1000,1000),0.003*shake);
 
-		if (Other.Physics != PHYS_Walking)
-			return;
-	}
+        if (Other.Physics != PHYS_Walking)
+            return;
+    }
 
-	Momentum = 100 * VRand();
-	Momentum.Z = FClamp(0,Power,Power - (0.4 * dist + Max(10,Other.Mass)*10));
-	Other.AddVelocity(Momentum);
+    Momentum = 100 * VRand();
+    Momentum.Z = FClamp(0,Power,Power - (0.4 * dist + Max(10,Other.Mass)*10));
+    Other.AddVelocity(Momentum);
 }
 
 function PlayDirectionalHit(Vector HitLoc)
@@ -208,113 +208,113 @@ function PlayDirectionalHit(Vector HitLoc)
 
 simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 {
-	AmbientSound = None;
-	bCanTeleport = false;
-	bReplicateMovement = false;
-	bTearOff = true;
-	bPlayedDeath = true;
+    AmbientSound = None;
+    bCanTeleport = false;
+    bReplicateMovement = false;
+    bTearOff = true;
+    bPlayedDeath = true;
 
-	HitDamageType = DamageType;
-	TakeHitLocation = HitLoc;
-	LifeSpan = RagdollLifeSpan;
+    HitDamageType = DamageType;
+    TakeHitLocation = HitLoc;
+    LifeSpan = RagdollLifeSpan;
 
-	GotoState('Dying');
+    GotoState('Dying');
 
-	Velocity += TearOffMomentum;
-	BaseEyeHeight = Default.BaseEyeHeight;
-	SetPhysics(PHYS_Falling);
+    Velocity += TearOffMomentum;
+    BaseEyeHeight = Default.BaseEyeHeight;
+    SetPhysics(PHYS_Falling);
 
-	if ( (DamageType == class'DamTypeSniperHeadShot') || ((HitLoc.Z > Location.Z + 0.75 * CollisionHeight) && (FRand() > 0.5)
-	     && (DamageType != class'DamTypeAssaultBullet') && (DamageType != class'DamTypeMinigunBullet') && (DamageType != class'DamTypeFlakChunk')) )
-	{
-		PlayAnim('TDeat003',1,0.05);
-		CreateGib('head',DamageType,Rotation);
-		return;
-	}
+    if ( (DamageType == class'DamTypeSniperHeadShot') || ((HitLoc.Z > Location.Z + 0.75 * CollisionHeight) && (FRand() > 0.5)
+         && (DamageType != class'DamTypeAssaultBullet') && (DamageType != class'DamTypeMinigunBullet') && (DamageType != class'DamTypeFlakChunk')) )
+    {
+        PlayAnim('TDeat003',1,0.05);
+        CreateGib('head',DamageType,Rotation);
+        return;
+    }
 
-	if (Velocity.Z > 300)
-	{
-		if (FRand() < 0.5)
-			PlayAnim('TDeat001',1.2,0.05);
-		else
-			PlayAnim('TDeat002',1.2,0.05);
-		return;
-	}
-	PlayAnim(DeathAnim[Rand(3)],1.2,0.05);
+    if (Velocity.Z > 300)
+    {
+        if (FRand() < 0.5)
+            PlayAnim('TDeat001',1.2,0.05);
+        else
+            PlayAnim('TDeat002',1.2,0.05);
+        return;
+    }
+    PlayAnim(DeathAnim[Rand(3)],1.2,0.05);
 }
 
 function vector GetFireStart(vector X, vector Y, vector Z)
 {
-	return Location + 1.2*CollisionRadius * X + 0.4 * CollisionHeight * Z;
+    return Location + 1.2*CollisionRadius * X + 0.4 * CollisionHeight * Z;
 }
 
 function SpawnRock()
 {
-	local vector X,Y,Z, FireStart;
-	local rotator FireRotation;
-	local Projectile Proj;
+    local vector X,Y,Z, FireStart;
+    local rotator FireRotation;
+    local Projectile Proj;
 
-	GetAxes(Rotation,X,Y,Z);
-	FireStart = Location + 1.2*CollisionRadius * X + 0.4 * CollisionHeight * Z;
-	if ( !SavedFireProperties.bInitialized )
-	{
-		SavedFireProperties.AmmoClass = MyAmmo.Class;
-		SavedFireProperties.ProjectileClass = MyAmmo.ProjectileClass;
-		SavedFireProperties.WarnTargetPct = MyAmmo.WarnTargetPct;
-		SavedFireProperties.MaxRange = MyAmmo.MaxRange;
-		SavedFireProperties.bTossed = MyAmmo.bTossed;
-		SavedFireProperties.bTrySplash = MyAmmo.bTrySplash;
-		SavedFireProperties.bLeadTarget = MyAmmo.bLeadTarget;
-		SavedFireProperties.bInstantHit = MyAmmo.bInstantHit;
-		SavedFireProperties.bInitialized = true;
-	}
+    GetAxes(Rotation,X,Y,Z);
+    FireStart = Location + 1.2*CollisionRadius * X + 0.4 * CollisionHeight * Z;
+    if ( !SavedFireProperties.bInitialized )
+    {
+        SavedFireProperties.AmmoClass = MyAmmo.Class;
+        SavedFireProperties.ProjectileClass = MyAmmo.ProjectileClass;
+        SavedFireProperties.WarnTargetPct = MyAmmo.WarnTargetPct;
+        SavedFireProperties.MaxRange = MyAmmo.MaxRange;
+        SavedFireProperties.bTossed = MyAmmo.bTossed;
+        SavedFireProperties.bTrySplash = MyAmmo.bTrySplash;
+        SavedFireProperties.bLeadTarget = MyAmmo.bLeadTarget;
+        SavedFireProperties.bInstantHit = MyAmmo.bInstantHit;
+        SavedFireProperties.bInitialized = true;
+    }
 
-	FireRotation = Controller.AdjustAim(SavedFireProperties,FireStart,600);
-	if (FRand() < 0.4)
-	{
-		Proj = Spawn(class'SMPTitanBoulder',,,FireStart,FireRotation);
-		if (Proj != None)
-		{
-			Proj.SetPhysics(PHYS_Projectile);
-			Proj.setDrawScale(Proj.DrawScale*DrawScale/default.DrawScale);
-			Proj.SetCollisionSize(Proj.CollisionRadius*DrawScale/default.DrawScale,Proj.CollisionHeight*DrawScale/default.DrawScale);
-			Proj.Velocity = (ProjectileSpeed+Rand(ProjectileMaxSpeed-ProjectileSpeed)) *vector(Proj.Rotation)*DrawScale/default.DrawScale;
-		}
-		return;
-	}
+    FireRotation = Controller.AdjustAim(SavedFireProperties,FireStart,600);
+    if (FRand() < 0.4)
+    {
+        Proj = Spawn(class'SMPTitanBoulder',,,FireStart,FireRotation);
+        if (Proj != None)
+        {
+            Proj.SetPhysics(PHYS_Projectile);
+            Proj.setDrawScale(Proj.DrawScale*DrawScale/default.DrawScale);
+            Proj.SetCollisionSize(Proj.CollisionRadius*DrawScale/default.DrawScale,Proj.CollisionHeight*DrawScale/default.DrawScale);
+            Proj.Velocity = (ProjectileSpeed+Rand(ProjectileMaxSpeed-ProjectileSpeed)) *vector(Proj.Rotation)*DrawScale/default.DrawScale;
+        }
+        return;
+    }
 
-	Proj = Spawn(MyAmmo.ProjectileClass,,,FireStart,FireRotation);
-	if (Proj != None)
-	{
-		Proj.SetPhysics(PHYS_Projectile);
-		Proj.setDrawScale(Proj.DrawScale*DrawScale/default.DrawScale);
-		Proj.SetCollisionSize(Proj.CollisionRadius*DrawScale/default.DrawScale,Proj.CollisionHeight*DrawScale/default.DrawScale);
-		Proj.Velocity = (ProjectileSpeed+Rand(ProjectileMaxSpeed-ProjectileSpeed)) *vector(Proj.Rotation)*DrawScale/default.DrawScale;
-	}
+    Proj = Spawn(MyAmmo.ProjectileClass,,,FireStart,FireRotation);
+    if (Proj != None)
+    {
+        Proj.SetPhysics(PHYS_Projectile);
+        Proj.setDrawScale(Proj.DrawScale*DrawScale/default.DrawScale);
+        Proj.SetCollisionSize(Proj.CollisionRadius*DrawScale/default.DrawScale,Proj.CollisionHeight*DrawScale/default.DrawScale);
+        Proj.Velocity = (ProjectileSpeed+Rand(ProjectileMaxSpeed-ProjectileSpeed)) *vector(Proj.Rotation)*DrawScale/default.DrawScale;
+    }
 
-	FireStart = Location + 1.2*CollisionRadius * X -40*Y+ 0.4 * CollisionHeight * Z;
-	Proj = Spawn(MyAmmo.ProjectileClass,,,FireStart,FireRotation);
-	if (Proj != None)
-	{
-		Proj.SetPhysics(PHYS_Projectile);
-		Proj.setDrawScale(Proj.DrawScale*DrawScale/default.DrawScale);
-		Proj.SetCollisionSize(Proj.CollisionRadius*DrawScale/default.DrawScale,Proj.CollisionHeight*DrawScale/default.DrawScale);
-		Proj.Velocity = (ProjectileSpeed + Rand(ProjectileMaxSpeed - ProjectileSpeed)) *vector(Proj.Rotation)*DrawScale/default.DrawScale;
-	}
-	bStomped = false;
-	ThrowCount++;
-	if (ThrowCount >= 2)
-	{
-		bThrowed = true;
-		ThrowCount = 0;
-	}
+    FireStart = Location + 1.2*CollisionRadius * X -40*Y+ 0.4 * CollisionHeight * Z;
+    Proj = Spawn(MyAmmo.ProjectileClass,,,FireStart,FireRotation);
+    if (Proj != None)
+    {
+        Proj.SetPhysics(PHYS_Projectile);
+        Proj.setDrawScale(Proj.DrawScale*DrawScale/default.DrawScale);
+        Proj.SetCollisionSize(Proj.CollisionRadius*DrawScale/default.DrawScale,Proj.CollisionHeight*DrawScale/default.DrawScale);
+        Proj.Velocity = (ProjectileSpeed + Rand(ProjectileMaxSpeed - ProjectileSpeed)) *vector(Proj.Rotation)*DrawScale/default.DrawScale;
+    }
+    bStomped = false;
+    ThrowCount++;
+    if (ThrowCount >= 2)
+    {
+        bThrowed = true;
+        ThrowCount = 0;
+    }
 }
 
 state Dying
 {
 ignores AnimEnd, Trigger, Bump, HitWall, HeadVolumeChange, PhysicsVolumeChange, Falling, BreathTimer;
-	simulated function ProcessHitFX()
-	{}
+    simulated function ProcessHitFX()
+    {}
 }
 
 defaultproperties

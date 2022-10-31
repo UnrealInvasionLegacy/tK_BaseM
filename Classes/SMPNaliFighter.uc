@@ -1,5 +1,5 @@
 class SMPNaliFighter extends SMPMonster
-	config(tK_BaseM);
+    config(tK_BaseM);
 
 var() config array<string> WeaponClassName;
 var() config bool bNoThrowWeapon;
@@ -7,87 +7,87 @@ var() float FireRateScale;
 
 function PostBeginPlay()
 {
-	local class<Weapon> WeaponClass;
-	local int x;
+    local class<Weapon> WeaponClass;
+    local int x;
 
-	Super.PostBeginPlay();
+    Super.PostBeginPlay();
 
-	x = Rand(WeaponClassName.Length);
+    x = Rand(WeaponClassName.Length);
 
-	WeaponClass = Class<Weapon>(DynamicLoadObject(WeaponClassName[x],class'class'));
-	if (WeaponClass != None)
-		Weapon = spawn(WeaponClass,self);
+    WeaponClass = Class<Weapon>(DynamicLoadObject(WeaponClassName[x],class'class'));
+    if (WeaponClass != None)
+        Weapon = spawn(WeaponClass,self);
 
-	if (Weapon == None)
-		return;
+    if (Weapon == None)
+        return;
 
-	Weapon.GiveTo(self);
-	Weapon.AttachToPawn(self);
+    Weapon.GiveTo(self);
+    Weapon.AttachToPawn(self);
 
-	if ( !SavedFireProperties.bInitialized )
-	{
-		SavedFireProperties.AmmoClass = Weapon.AmmoClass[0];
-		SavedFireProperties.ProjectileClass = Weapon.AmmoClass[0].default.ProjectileClass;
-		SavedFireProperties.WarnTargetPct = Weapon.AmmoClass[0].default.WarnTargetPct;
-		SavedFireProperties.MaxRange = Weapon.AmmoClass[0].default.MaxRange;
-		SavedFireProperties.bTossed = Weapon.AmmoClass[0].default.bTossed;
-		SavedFireProperties.bTrySplash = Weapon.AmmoClass[0].default.bTrySplash;
-		SavedFireProperties.bLeadTarget = Weapon.AmmoClass[0].default.bLeadTarget;
-		SavedFireProperties.bInstantHit = Weapon.AmmoClass[0].default.bInstantHit;
-		SavedFireProperties.bInitialized = true;
-	}
+    if ( !SavedFireProperties.bInitialized )
+    {
+        SavedFireProperties.AmmoClass = Weapon.AmmoClass[0];
+        SavedFireProperties.ProjectileClass = Weapon.AmmoClass[0].default.ProjectileClass;
+        SavedFireProperties.WarnTargetPct = Weapon.AmmoClass[0].default.WarnTargetPct;
+        SavedFireProperties.MaxRange = Weapon.AmmoClass[0].default.MaxRange;
+        SavedFireProperties.bTossed = Weapon.AmmoClass[0].default.bTossed;
+        SavedFireProperties.bTrySplash = Weapon.AmmoClass[0].default.bTrySplash;
+        SavedFireProperties.bLeadTarget = Weapon.AmmoClass[0].default.bLeadTarget;
+        SavedFireProperties.bInstantHit = Weapon.AmmoClass[0].default.bInstantHit;
+        SavedFireProperties.bInitialized = true;
+    }
 
-	if (Weapon.bSniping)
-		bMeleeFighter = false;
+    if (Weapon.bSniping)
+        bMeleeFighter = false;
 
-	Weapon.ClientState = WS_ReadyToFire;
-	Weapon.GetFireMode(0).FireRate *= FireRateScale;
-	Weapon.GetFireMode(1).FireRate *= FireRateScale;
-	Weapon.GetFireMode(0).AmmoPerFire = 0;
-	Weapon.GetFireMode(1).AmmoPerFire = 0;
+    Weapon.ClientState = WS_ReadyToFire;
+    Weapon.GetFireMode(0).FireRate *= FireRateScale;
+    Weapon.GetFireMode(1).FireRate *= FireRateScale;
+    Weapon.GetFireMode(0).AmmoPerFire = 0;
+    Weapon.GetFireMode(1).AmmoPerFire = 0;
 }
 
 function RangedAttack(Actor A)
 {
-	if (Weapon != None && Controller.Enemy != None && Weapon.CanAttack(Controller.Enemy) && Controller.Enemy.Health > 0)
-	{
-		Weapon.BotFire(false);
-	}
-	else
-	{
-		if (Weapon.IsFiring())
-		{
-			Weapon.StopFire(0);
-			Weapon.StopFire(1);
-		}
-	}
+    if (Weapon != None && Controller.Enemy != None && Weapon.CanAttack(Controller.Enemy) && Controller.Enemy.Health > 0)
+    {
+        Weapon.BotFire(false);
+    }
+    else
+    {
+        if (Weapon.IsFiring())
+        {
+            Weapon.StopFire(0);
+            Weapon.StopFire(1);
+        }
+    }
 }
 
 function Tick(float DeltaTime)
 {
-	Super.Tick(DeltaTime);
+    Super.Tick(DeltaTime);
 }
 
 function bool IsHeadShot(vector loc, vector ray, float AdditionalScale)
 {
-	return super(xPawn).IsHeadShot(loc, ray, AdditionalScale);
+    return super(xPawn).IsHeadShot(loc, ray, AdditionalScale);
 }
 
 function TossWeapon(Vector TossVel)
 {
-	if (bNoThrowWeapon)
-		return;
-	Super.TossWeapon(TossVel);
+    if (bNoThrowWeapon)
+        return;
+    Super.TossWeapon(TossVel);
 }
 
 simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 {
-	Super(xPawn).PlayDying(DamageType, HitLoc);
+    Super(xPawn).PlayDying(DamageType, HitLoc);
 }
 
 simulated function ProcessHitFX()
 {
-	Super(xPawn).ProcessHitFX();
+    Super(xPawn).ProcessHitFX();
 }
 
 defaultproperties

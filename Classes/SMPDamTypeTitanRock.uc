@@ -1,5 +1,5 @@
 class SMPDamTypeTitanRock extends WeaponDamageType
-	abstract;
+    abstract;
 
 defaultproperties
 {
