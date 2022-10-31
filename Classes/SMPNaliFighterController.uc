@@ -391,14 +391,9 @@ function SetPeripheralVision()
 
 function WhatToDoNext(byte CallingByte)
 {
-    if (ChoosingAttackLevel > 0)
-        log("CHOOSEATTACKAGAIN in state "$GetStateName()$" enemy "$GetEnemyName()$" old enemy "$GetOldEnemyName()$" CALLING BYTE "$CallingByte);
-
     if (ChooseAttackTime == Level.TimeSeconds)
     {
         ChooseAttackCounter++;
-        if (ChooseAttackCounter > 3)
-            log("CHOOSEATTACKSERIAL in state "$GetStateName()$" enemy "$GetEnemyName()$" old enemy "$GetOldEnemyName()$" CALLING BYTE "$CallingByte);
     }
     else
     {
@@ -508,9 +503,6 @@ function FightEnemy(bool bCanCharge,float  EnemyStrength)
     local float AdjustedCombatStyle;
     local bool bFarAway, bOldForcedCharge;
     local NavigationPoint N;
-
-    if ((Enemy == None) || (Pawn == None))
-        log("HERE 3 Enemy "$Enemy$" pawn "$Pawn);
 
     if ((Enemy == FailedHuntEnemy) && (Level.TimeSeconds == FailedHuntTime))
     {
@@ -640,9 +632,6 @@ function DoRangedAttackOn(Actor A)
 
 function ChooseAttackMode()
 {
-    GoalString = " ChooseAttackMode last seen "$(Level.TimeSeconds - LastSeenTime);
-    if ((Enemy == None) || (Pawn == None))
-        log("HERE 1 Enemy "$Enemy$" pawn "$Pawn);
     GoalString = "ChooseAttackMode FightEnemy";
     FightEnemy(true,0);
 }
@@ -651,7 +640,6 @@ event SoakStop(string problem)
 {
     local UnrealPlayer PC;
 
-    log(problem);
     SoakString = problem;
     GoalString = SoakString@GoalString;
     ForEach DynamicActors(class'UnrealPlayer',PC)
@@ -2323,8 +2311,6 @@ ignores SeePlayer, HearNoise, Bump;
         Pawn.Acceleration = vect(0,0,0);
         if (Target == None)
             Target = Enemy;
-        if (Target == None)
-            log(GetHumanReadableName()$" no target in ranged attack");
     }
 
 Begin:
