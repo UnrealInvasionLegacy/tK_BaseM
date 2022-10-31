@@ -33,7 +33,7 @@ simulated function ProcessTouch (Actor Other, vector HitLocation)
         DestroyTrails();
         Destroy();
     }
-    else if ( !Other.IsA('SMPQueenProjectile') || Other.bProjTarget )
+    else if ( SMPQueenProjectile(Other) == None || Other.bProjTarget )
     {
         Other.TakeDamage(Damage,instigator,HitLocation,MomentumTransfer*Normal(Other.Location - Location),MyDamageType);
         Destroy();

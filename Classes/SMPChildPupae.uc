@@ -13,7 +13,7 @@ simulated function PreBeginPlay()
 
 function TakeDamage(int Damage, Pawn EventInstigator, vector HitLocation, vector Momentum, class<DamageType> DamageType)
 {
-    if (EventInstigator.IsA('SMPQueen'))
+    if(SMPQueen(EventInstigator) != None)
         Destroy();
     super.TakeDamage(Damage, EventInstigator, HitLocation, Momentum, DamageType);
 }

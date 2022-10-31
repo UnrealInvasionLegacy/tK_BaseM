@@ -62,7 +62,7 @@ function SpawnTwoShots()
 
         if (Other != None && (Other != Instigator || ReflectNum > 0))
         {
-            if (Other.IsA('xPawn') && xPawn(Other).CheckReflect(HitLocation, RefNormal, DamageMin*0.25))
+            if (xPawn(Other) != None && xPawn(Other).CheckReflect(HitLocation, RefNormal, DamageMin*0.25))
             {
                 bDoReflect = true;
             }

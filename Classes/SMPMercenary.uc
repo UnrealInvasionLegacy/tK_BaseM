@@ -228,7 +228,7 @@ simulated function DoTrace(Vector Start, Rotator Dir)
         Damage = SprayDamage + Rand(SprayDamageMax - SprayDamage);
         if (Other != None && (Other != Instigator || ReflectNum > 0))
         {
-            if (Other.IsA('xPawn') && xPawn(Other).CheckReflect(HitLocation, RefNormal, Damage*0.25))
+            if (xPawn(Other) != None && xPawn(Other).CheckReflect(HitLocation, RefNormal, Damage*0.25))
             {
                 bDoReflect = true;
                 HitNormal = Vect(0,0,0);

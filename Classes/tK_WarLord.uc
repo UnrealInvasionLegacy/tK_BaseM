@@ -4,7 +4,7 @@ var bool bRocketDir;
 
 function bool SameSpeciesAs(Pawn P)
 {
-    return ( (Monster(P) != None) && (P.IsA('Skaarj') || P.IsA('WarLord')) );
+    return (tK_Skaarj(P) != None || tK_WarLord(P) != None)
 }
 
 function PostBeginPlay()

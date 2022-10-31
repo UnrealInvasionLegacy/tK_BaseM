@@ -4,7 +4,7 @@ var int Health;
 
 function Touch( actor Other )
 {
-    if (Other.IsA('xPawn') && !Other.IsA('Monster'))
+    if(xPawn(Other) == None && Monster(Other) != None)
         Destroy();
 }
 

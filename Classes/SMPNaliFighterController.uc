@@ -1438,7 +1438,7 @@ state Roaming
     function BeginState();
     function MayFall()
     {
-        Pawn.bCanJump = ((MoveTarget != None) && ((MoveTarget.Physics != PHYS_Falling) || !MoveTarget.IsA('Pickup')));
+        Pawn.bCanJump = ((MoveTarget != None) && ((MoveTarget.Physics != PHYS_Falling) || Pickup(MoveTarget) == None));
     }
 
 Begin:

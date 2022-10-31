@@ -50,7 +50,7 @@ function ProcessTouch(Actor Other, Vector HitLocation)
     {
         Other.Destroy();
     }
-    else if ( !Other.IsA('SMPTitanBigBigRock') )
+    else if(SMPTitanBigRock(Other) == None)
     {
         Hitdamage = Damage * 0.00002 * (DrawScale**3) * speed;
         if ((HitDamage > 3) && (speed > 150) && (Role == ROLE_Authority))
@@ -160,7 +160,7 @@ function SpawnChunks(int num)
 
     if (DrawScale < 2 + FRand() * 2)
         return;
-    if (Level.Game.IsA('Invasion') && DrawScale < 4 + FRand() * 2)
+    if (Invasion(Level.Game) != None && DrawScale < 4 + FRand() * 2)
         return;
 
     NumChunks = 1 + Rand(num);
