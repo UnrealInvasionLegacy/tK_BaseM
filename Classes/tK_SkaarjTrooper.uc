@@ -1,4 +1,4 @@
-class tK_SkaarjTrooper extends Skaarj;
+class tK_SkaarjTrooper extends tK_Skaarj;
 
 var() bool bUseShield;
 var() class<Projectile> ProjectileClass;
