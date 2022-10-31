@@ -51,14 +51,22 @@ simulated function PostBeginPlay()
 {
     Super.PostBeginPlay();
     GroundSpeed = GroundSpeed * (1 + 0.1 * MonsterController(Controller).Skill);
-    QueenFadeOutSkin = new class'ColorModifier';
+    QueenFadeOutSkin = Level.ObjectPool.AllocateObject(class'ColorModifier');
     QueenFadeOutSkin.Material = Skins[0];
     Skins[0] = QueenFadeOutSkin;
+
+    // assume the allocated object is dirty
+    QueenFadeOutSkin.Color.R = 255;
+    QueenFadeOutSkin.Color.G = 255;
+    QueenFadeOutSkin.Color.B = 255;
+    QueenFadeOutSkin.RenderTwoSided = true;
+    QueenFadeOutSkin.AlphaBlend = true;
+    QueenFadeOutSkin.MaterialType = 9;
 }
 
 simulated function Destroyed()
 {
-    QueenFadeOutSkin = None;
+    Level.ObjectPool.FreeObject(QueenFadeOutSkin);
     if (Shield != None)
         Shield.Destroy();
 
