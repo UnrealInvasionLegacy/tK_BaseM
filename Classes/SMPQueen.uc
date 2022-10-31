@@ -83,11 +83,6 @@ function TakeDamage(int Damage, Pawn instigatedBy, Vector hitlocation, vector mo
     super.TakeDamage(Damage, instigatedBy, hitlocation, momentum, damageType);
 }
 
-function bool SameSpeciesAs(Pawn P)
-{
-    return (Monster(P) != None && P.IsA('Monster'));
-}
-
 function PlayVictory()
 {
     if (Controller != None)

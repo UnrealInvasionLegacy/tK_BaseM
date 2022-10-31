@@ -50,11 +50,6 @@ function Landed(vector HitNormal)
     super.Landed(HitNormal);
 }
 
-function bool SameSpeciesAs(Pawn P)
-{
-    return (Monster(P) != None && P.IsA('Monster'));
-}
-
 function PlayVictory()
 {
     Controller.bPreparingMove = true;
